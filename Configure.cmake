@@ -80,125 +80,118 @@ function(command_arguments PROPNAME)
   set(${PROPNAME} ${quoted_args} PARENT_SCOPE)
 endfunction()
 
-# PLATFORM DETECTION
-if((CMAKE_SYSTEM_PROCESSOR MATCHES "x86") OR (CMAKE_SYSTEM_PROCESSOR MATCHES "AMD64") OR (CMAKE_SYSTEM_PROCESSOR MATCHES "amd64") OR (CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$"))
-  set(SLEEF_ARCH_X86 ON CACHE INTERNAL "True for x86 architecture.")
+# ---------------------------------------------------------------------
+# x86-x64 arch
+# ---------------------------------------------------------------------
+set(SLEEF_HEADER_LIST_X86
+  SSE_
+  SSE2
+  SSE4
+  AVX_
+  AVX
+  FMA4
+  AVX2
+  AVX2128
+  AVX512F_
+  AVX512F
+  AVX512FNOFMA
+)
 
-  set(SLEEF_HEADER_LIST
-    SSE_
-    SSE2
-    SSE4
-    AVX_
-    AVX
-    FMA4
-    AVX2
-    AVX2128
-    AVX512F_
-    AVX512F
-    AVX512FNOFMA
-    PUREC_SCALAR
-    PURECFMA_SCALAR
-  )
-  command_arguments(HEADER_PARAMS_SSE_          cinz_ 2 4 __m128d __m128 __m128i __m128i __SSE2__)
-  command_arguments(HEADER_PARAMS_SSE2          cinz_ 2 4 __m128d __m128 __m128i __m128i __SSE2__ sse2)
-  command_arguments(HEADER_PARAMS_SSE4          cinz_ 2 4 __m128d __m128 __m128i __m128i __SSE2__ sse4)
-  command_arguments(HEADER_PARAMS_AVX_          cinz_ 4 8 __m256d __m256 __m128i "struct { __m128i x, y$<SEMICOLON> }" __AVX__)
-  command_arguments(HEADER_PARAMS_AVX           cinz_ 4 8 __m256d __m256 __m128i "struct { __m128i x, y$<SEMICOLON> }" __AVX__ avx)
-  command_arguments(HEADER_PARAMS_FMA4          finz_ 4 8 __m256d __m256 __m128i "struct { __m128i x, y$<SEMICOLON> }" __AVX__ fma4)
-  command_arguments(HEADER_PARAMS_AVX2          finz_ 4 8 __m256d __m256 __m128i __m256i __AVX__ avx2)
-  command_arguments(HEADER_PARAMS_AVX2128       finz_ 2 4 __m128d __m128 __m128i __m128i __SSE2__ avx2128)
-  command_arguments(HEADER_PARAMS_AVX512F_      finz_ 8 16 __m512d __m512 __m256i __m512i __AVX512F__)
-  command_arguments(HEADER_PARAMS_AVX512F       finz_ 8 16 __m512d __m512 __m256i __m512i __AVX512F__ avx512f)
-  command_arguments(HEADER_PARAMS_AVX512FNOFMA  cinz_ 8 16 __m512d __m512 __m256i __m512i __AVX512F__ avx512fnofma)
+command_arguments(HEADER_PARAMS_SSE_          cinz_ 2 4 __m128d __m128 __m128i __m128i __SSE2__)
+command_arguments(HEADER_PARAMS_SSE2          cinz_ 2 4 __m128d __m128 __m128i __m128i __SSE2__ sse2)
+command_arguments(HEADER_PARAMS_SSE4          cinz_ 2 4 __m128d __m128 __m128i __m128i __SSE2__ sse4)
+command_arguments(HEADER_PARAMS_AVX_          cinz_ 4 8 __m256d __m256 __m128i "struct { __m128i x, y$<SEMICOLON> }" __AVX__)
+command_arguments(HEADER_PARAMS_AVX           cinz_ 4 8 __m256d __m256 __m128i "struct { __m128i x, y$<SEMICOLON> }" __AVX__ avx)
+command_arguments(HEADER_PARAMS_FMA4          finz_ 4 8 __m256d __m256 __m128i "struct { __m128i x, y$<SEMICOLON> }" __AVX__ fma4)
+command_arguments(HEADER_PARAMS_AVX2          finz_ 4 8 __m256d __m256 __m128i __m256i __AVX__ avx2)
+command_arguments(HEADER_PARAMS_AVX2128       finz_ 2 4 __m128d __m128 __m128i __m128i __SSE2__ avx2128)
+command_arguments(HEADER_PARAMS_AVX512F_      finz_ 8 16 __m512d __m512 __m256i __m512i __AVX512F__)
+command_arguments(HEADER_PARAMS_AVX512F       finz_ 8 16 __m512d __m512 __m256i __m512i __AVX512F__ avx512f)
+command_arguments(HEADER_PARAMS_AVX512FNOFMA  cinz_ 8 16 __m512d __m512 __m256i __m512i __AVX512F__ avx512fnofma)
 
-  command_arguments(ALIAS_PARAMS_AVX512F_DP   8 __m512d __m256i e avx512f)
-  command_arguments(ALIAS_PARAMS_AVX512F_SP -16 __m512  __m512i e avx512f)
+command_arguments(ALIAS_PARAMS_AVX512F_DP   8 __m512d __m256i e avx512f)
+command_arguments(ALIAS_PARAMS_AVX512F_SP -16 __m512  __m512i e avx512f)
 
-  set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR "-mavx2;-mfma")
+set(TESTER3_DEFINITIONS_SSE2          ATR=cinz_ DPTYPE=__m128d SPTYPE=__m128 DPTYPESPEC=d2 SPTYPESPEC=f4  EXTSPEC=sse2)
+set(TESTER3_DEFINITIONS_SSE4          ATR=cinz_ DPTYPE=__m128d SPTYPE=__m128 DPTYPESPEC=d2 SPTYPESPEC=f4  EXTSPEC=sse4)
+set(TESTER3_DEFINITIONS_AVX2128       ATR=finz_ DPTYPE=__m128d SPTYPE=__m128 DPTYPESPEC=d2 SPTYPESPEC=f4  EXTSPEC=avx2128)
+set(TESTER3_DEFINITIONS_AVX           ATR=cinz_ DPTYPE=__m256d SPTYPE=__m256 DPTYPESPEC=d4 SPTYPESPEC=f8  EXTSPEC=avx)
+set(TESTER3_DEFINITIONS_FMA4          ATR=finz_ DPTYPE=__m256d SPTYPE=__m256 DPTYPESPEC=d4 SPTYPESPEC=f8  EXTSPEC=fma4)
+set(TESTER3_DEFINITIONS_AVX2          ATR=finz_ DPTYPE=__m256d SPTYPE=__m256 DPTYPESPEC=d4 SPTYPESPEC=f8  EXTSPEC=avx2)
+set(TESTER3_DEFINITIONS_AVX512F       ATR=finz_ DPTYPE=__m512d SPTYPE=__m512 DPTYPESPEC=d8 SPTYPESPEC=f16 EXTSPEC=avx512f)
+set(TESTER3_DEFINITIONS_AVX512FNOFMA  ATR=cinz_ DPTYPE=__m512d SPTYPE=__m512 DPTYPESPEC=d8 SPTYPESPEC=f16 EXTSPEC=avx512fnofma)
 
-  set(TESTER3_DEFINITIONS_SSE2          ATR=cinz_ DPTYPE=__m128d SPTYPE=__m128 DPTYPESPEC=d2 SPTYPESPEC=f4  EXTSPEC=sse2)
-  set(TESTER3_DEFINITIONS_SSE4          ATR=cinz_ DPTYPE=__m128d SPTYPE=__m128 DPTYPESPEC=d2 SPTYPESPEC=f4  EXTSPEC=sse4)
-  set(TESTER3_DEFINITIONS_AVX2128       ATR=finz_ DPTYPE=__m128d SPTYPE=__m128 DPTYPESPEC=d2 SPTYPESPEC=f4  EXTSPEC=avx2128)
-  set(TESTER3_DEFINITIONS_AVX           ATR=cinz_ DPTYPE=__m256d SPTYPE=__m256 DPTYPESPEC=d4 SPTYPESPEC=f8  EXTSPEC=avx)
-  set(TESTER3_DEFINITIONS_FMA4          ATR=finz_ DPTYPE=__m256d SPTYPE=__m256 DPTYPESPEC=d4 SPTYPESPEC=f8  EXTSPEC=fma4)
-  set(TESTER3_DEFINITIONS_AVX2          ATR=finz_ DPTYPE=__m256d SPTYPE=__m256 DPTYPESPEC=d4 SPTYPESPEC=f8  EXTSPEC=avx2)
-  set(TESTER3_DEFINITIONS_AVX512F       ATR=finz_ DPTYPE=__m512d SPTYPE=__m512 DPTYPESPEC=d8 SPTYPESPEC=f16 EXTSPEC=avx512f)
-  set(TESTER3_DEFINITIONS_AVX512FNOFMA  ATR=cinz_ DPTYPE=__m512d SPTYPE=__m512 DPTYPESPEC=d8 SPTYPESPEC=f16 EXTSPEC=avx512fnofma)
+# ---------------------------------------------------------------------
+# Aarch64
+# ---------------------------------------------------------------------
+set(SLEEF_HEADER_LIST_AARCH64
+  ADVSIMD_
+  ADVSIMD
+  ADVSIMDNOFMA
+  SVE
+  SVENOFMA
+)
 
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-  set(SLEEF_ARCH_AARCH64 ON CACHE INTERNAL "True for Aarch64 architecture.")
-  # Aarch64 requires support for advsimdfma4
-  set(COMPILER_SUPPORTS_ADVSIMD 1)
-  set(COMPILER_SUPPORTS_ADVSIMDNOFMA 1)
+command_arguments(HEADER_PARAMS_ADVSIMD_      finz_ 2 4 float64x2_t float32x4_t int32x2_t int32x4_t __ARM_NEON)
+command_arguments(HEADER_PARAMS_ADVSIMD       finz_ 2 4 float64x2_t float32x4_t int32x2_t int32x4_t __ARM_NEON advsimd)
+command_arguments(HEADER_PARAMS_ADVSIMDNOFMA  cinz_ 2 4 float64x2_t float32x4_t int32x2_t int32x4_t __ARM_NEON advsimdnofma)
+command_arguments(HEADER_PARAMS_SVE           finz_ x x svfloat64_t svfloat32_t svint32_t svint32_t __ARM_FEATURE_SVE sve)
+command_arguments(HEADER_PARAMS_SVENOFMA      cinz_ x x svfloat64_t svfloat32_t svint32_t svint32_t __ARM_FEATURE_SVE svenofma)
 
-  set(SLEEF_HEADER_LIST
-    ADVSIMD_
-    ADVSIMD
-    ADVSIMDNOFMA
-    SVE
-    SVENOFMA
-    PUREC_SCALAR
-    PURECFMA_SCALAR
-  )
-  command_arguments(HEADER_PARAMS_ADVSIMD_      finz_ 2 4 float64x2_t float32x4_t int32x2_t int32x4_t __ARM_NEON)
-  command_arguments(HEADER_PARAMS_ADVSIMD       finz_ 2 4 float64x2_t float32x4_t int32x2_t int32x4_t __ARM_NEON advsimd)
-  command_arguments(HEADER_PARAMS_ADVSIMDNOFMA  cinz_ 2 4 float64x2_t float32x4_t int32x2_t int32x4_t __ARM_NEON advsimdnofma)
-  command_arguments(HEADER_PARAMS_SVE           finz_ x x svfloat64_t svfloat32_t svint32_t svint32_t __ARM_FEATURE_SVE sve)
-  command_arguments(HEADER_PARAMS_SVENOFMA      cinz_ x x svfloat64_t svfloat32_t svint32_t svint32_t __ARM_FEATURE_SVE svenofma)
+command_arguments(ALIAS_PARAMS_ADVSIMD_DP  2 float64x2_t int32x2_t n advsimd)
+command_arguments(ALIAS_PARAMS_ADVSIMD_SP -4 float32x4_t int32x4_t n advsimd)
 
-  command_arguments(ALIAS_PARAMS_ADVSIMD_DP  2 float64x2_t int32x2_t n advsimd)
-  command_arguments(ALIAS_PARAMS_ADVSIMD_SP -4 float32x4_t int32x4_t n advsimd)
+set(TESTER3_DEFINITIONS_ADVSIMD       ATR=finz_ DPTYPE=float64x2_t SPTYPE=float32x4_t DPTYPESPEC=d2 SPTYPESPEC=f4 EXTSPEC=advsimd)
+set(TESTER3_DEFINITIONS_ADVSIMDNOFMA  ATR=cinz_ DPTYPE=float64x2_t SPTYPE=float32x4_t DPTYPESPEC=d2 SPTYPESPEC=f4 EXTSPEC=advsimdnofma)
+set(TESTER3_DEFINITIONS_SVE           ATR=finz_ DPTYPE=svfloat64_t SPTYPE=svfloat32_t DPTYPESPEC=dx SPTYPESPEC=fx EXTSPEC=sve)
+set(TESTER3_DEFINITIONS_SVENOFMA      ATR=cinz_ DPTYPE=svfloat64_t SPTYPE=svfloat32_t DPTYPESPEC=dx SPTYPESPEC=fx EXTSPEC=svenofma)
 
-  set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR "-march=armv8-a+simd")
+# ---------------------------------------------------------------------
+# Aarch32
+# ---------------------------------------------------------------------
+set(SLEEF_HEADER_LIST_AARCH32
+  NEON32_
+  NEON32
+  NEON32VFPV4
+)
 
-  set(TESTER3_DEFINITIONS_ADVSIMD       ATR=finz_ DPTYPE=float64x2_t SPTYPE=float32x4_t DPTYPESPEC=d2 SPTYPESPEC=f4 EXTSPEC=advsimd)
-  set(TESTER3_DEFINITIONS_ADVSIMDNOFMA  ATR=cinz_ DPTYPE=float64x2_t SPTYPE=float32x4_t DPTYPESPEC=d2 SPTYPESPEC=f4 EXTSPEC=advsimdnofma)
-  set(TESTER3_DEFINITIONS_SVE           ATR=finz_ DPTYPE=svfloat64_t SPTYPE=svfloat32_t DPTYPESPEC=dx SPTYPESPEC=fx EXTSPEC=sve)
-  set(TESTER3_DEFINITIONS_SVENOFMA      ATR=cinz_ DPTYPE=svfloat64_t SPTYPE=svfloat32_t DPTYPESPEC=dx SPTYPESPEC=fx EXTSPEC=svenofma)
+command_arguments(HEADER_PARAMS_NEON32_     cinz_ 2 4 - float32x4_t int32x2_t int32x4_t __ARM_NEON__)
+command_arguments(HEADER_PARAMS_NEON32      cinz_ 2 4 - float32x4_t int32x2_t int32x4_t __ARM_NEON__ neon)
+command_arguments(HEADER_PARAMS_NEON32VFPV4 finz_ 2 4 - float32x4_t int32x2_t int32x4_t __ARM_NEON__ neonvfpv4)
 
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-  set(SLEEF_ARCH_AARCH32 ON CACHE INTERNAL "True for Aarch32 architecture.")
-  set(COMPILER_SUPPORTS_NEON32 1)
-  set(COMPILER_SUPPORTS_NEON32VFPV4 1)
+command_arguments(ALIAS_PARAMS_NEON32_SP -4 float32x4_t int32x4_t - neon)
+command_arguments(ALIAS_PARAMS_NEON32_DP 0)
 
-  set(SLEEF_HEADER_LIST
-    NEON32_
-    NEON32
-    NEON32VFPV4
-    PUREC_SCALAR
-    PURECFMA_SCALAR
-  )
-  command_arguments(HEADER_PARAMS_NEON32_     cinz_ 2 4 - float32x4_t int32x2_t int32x4_t __ARM_NEON__)
-  command_arguments(HEADER_PARAMS_NEON32      cinz_ 2 4 - float32x4_t int32x2_t int32x4_t __ARM_NEON__ neon)
-  command_arguments(HEADER_PARAMS_NEON32VFPV4 finz_ 2 4 - float32x4_t int32x2_t int32x4_t __ARM_NEON__ neonvfpv4)
+# ---------------------------------------------------------------------
+# PPC64 Arch
+# ---------------------------------------------------------------------
+set(SLEEF_HEADER_LIST_PPC64
+  VSX_
+  VSX
+  VSXNOFMA
+)
 
-  command_arguments(ALIAS_PARAMS_NEON32_SP -4 float32x4_t int32x4_t - neon)
-  command_arguments(ALIAS_PARAMS_NEON32_DP 0)
+set(HEADER_PARAMS_VSX       finz_ 2 4 "vector double" "vector float" "vector int" "vector int" __VSX__ vsx)
+set(HEADER_PARAMS_VSX_      finz_ 2 4 "vector double" "vector float" "vector int" "vector int" __VSX__ vsx)
+set(HEADER_PARAMS_VSXNOFMA  cinz_ 2 4 "vector double" "vector float" "vector int" "vector int" __VSX__ vsxnofma)
+set(ALIAS_PARAMS_VSX_DP  2 "vector double" "vector int" - vsx)
+set(ALIAS_PARAMS_VSX_SP -4 "vector float" "vector int" - vsx)
 
-  set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR "-mfpu=vfpv4")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
-  set(SLEEF_ARCH_PPC64 ON CACHE INTERNAL "True for PPC64 architecture.")
+set(TESTER3_DEFINITIONS_VSX      ATR=finz_ DPTYPE=vector_double SPTYPE=vector_float DPTYPESPEC=d2 SPTYPESPEC=f4 EXTSPEC=vsx)
+set(TESTER3_DEFINITIONS_VSXNOFMA ATR=cinz_ DPTYPE=vector_double SPTYPE=vector_float DPTYPESPEC=d2 SPTYPESPEC=f4 EXTSPEC=vsxnofma)
 
-  set(SLEEF_HEADER_LIST
-    VSX_
-    VSX
-    VSXNOFMA
-    PUREC_SCALAR
-    PURECFMA_SCALAR
-  )
+# ---------------------------------------------------------------------
+# PUREC "arch" mode
+# ---------------------------------------------------------------------
+set(SLEEF_HEADER_LIST_PUREC
+  PUREC_SCALAR
+  PURECFMA_SCALAR
+)
 
-  set(HEADER_PARAMS_VSX       finz_ 2 4 "vector double" "vector float" "vector int" "vector int" __VSX__ vsx)
-  set(HEADER_PARAMS_VSX_      finz_ 2 4 "vector double" "vector float" "vector int" "vector int" __VSX__ vsx)
-  set(HEADER_PARAMS_VSXNOFMA  cinz_ 2 4 "vector double" "vector float" "vector int" "vector int" __VSX__ vsxnofma)
-  set(ALIAS_PARAMS_VSX_DP  2 "vector double" "vector int" - vsx)
-  set(ALIAS_PARAMS_VSX_SP -4 "vector float" "vector int" - vsx)
-
-  set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR "-mvsx")
-
-  set(TESTER3_DEFINITIONS_VSX      ATR=finz_ DPTYPE=vector_double SPTYPE=vector_float DPTYPESPEC=d2 SPTYPESPEC=f4 EXTSPEC=vsx)
-  set(TESTER3_DEFINITIONS_VSXNOFMA ATR=cinz_ DPTYPE=vector_double SPTYPE=vector_float DPTYPESPEC=d2 SPTYPESPEC=f4 EXTSPEC=vsxnofma)
-
-endif()
+set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR_X86 "-mavx2;-mfma")
+set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR_AARCH64 "-march=armv8-a;--target=aarch64-linux-gnueabi")
+set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR_AARCH32 "-mfpu=vfpv4")
+set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR_PPC64 "-mvsx")
 
 command_arguments(HEADER_PARAMS_PUREC_SCALAR    cinz_ 1 1 double float int32_t int32_t __STDC__ purec)
 command_arguments(HEADER_PARAMS_PURECFMA_SCALAR finz_ 1 1 double float int32_t int32_t FP_FAST_FMA purecfma)
@@ -212,7 +205,67 @@ set(TESTER3_DEFINITIONS_PURECFMA_SCALAR ATR=finz_ DPTYPE=double SPTYPE=float DPT
 set(COMPILER_SUPPORTS_PUREC_SCALAR 1)
 set(COMPILER_SUPPORTS_PURECFMA_SCALAR 1)
 
+# ---------------------------------------------------------------------
+# PLATFORM DETECTION
+# ---------------------------------------------------------------------
+if((CMAKE_SYSTEM_PROCESSOR MATCHES "x86") OR (CMAKE_SYSTEM_PROCESSOR MATCHES "AMD64") OR (CMAKE_SYSTEM_PROCESSOR MATCHES "amd64") OR (CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$"))
+  set(SLEEF_ARCH "X86")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  set(SLEEF_ARCH "AARCH64")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+  set(SLEEF_ARCH "AARCH32")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
+  set(SLEEF_ARCH "PPC64")
+endif()
+
+# ---------------------------------------------------------------------
+# PLATFORM SETUP
+# ---------------------------------------------------------------------
+set(SLEEF_ARCH_LIST  # Used when LLVM bitcode cross-compiling
+  X86
+  AARCH64
+  AARCH32
+  PPC64
+  PUREC
+)
+
+if(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR_${SLEEF_ARCH})
+  set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR ${CLANG_FLAGS_ENABLE_PURECFMA_SCALAR_${SLEEF_ARCH}})
+endif()
+
+if(SLEEF_ARCH EQUAL "X86")
+  set(SLEEF_ARCH_X86 ON CACHE INTERNAL "True for x86 architecture.")
+elseif(SLEEF_ARCH EQUAL "AARCH64")
+  set(SLEEF_ARCH_AARCH64 ON CACHE INTERNAL "True for Aarch64 architecture.")
+  set(COMPILER_SUPPORTS_ADVSIMD 1)
+  set(COMPILER_SUPPORTS_ADVSIMDNOFMA 1)
+elseif(SLEEF_ARCH EQUAL "AARCH32")
+  set(SLEEF_ARCH_AARCH32 ON CACHE INTERNAL "True for Aarch32 architecture.")
+  set(COMPILER_SUPPORTS_NEON32 1)
+  set(COMPILER_SUPPORTS_NEON32VFPV4 1)
+elseif(SLEEF_ARCH EQUAL "PPC64")
+  set(SLEEF_ARCH_PPC64 ON CACHE INTERNAL "True for PPC64 architecture.")
+endif()
+
+if (SLEEF_ENABLE_LLVM_BITCODE)
+  set(SLEEF_HEADER_LIST "")
+  foreach(ARCH ${SLEEF_ARCH_LIST})
+    list(APPEND SLEEF_HEADER_LIST ${SLEEF_HEADER_LIST_${ARCH}})
+  endforeach()
+
+  foreach(CPUARCH ${SLEEF_SUPPORTED_EXTENSIONS})
+    set(COMPILER_SUPPORTS_${CPUARCH} 1)
+  endforeach()
+else()
+  set(SLEEF_HEADER_LIST 
+    ${SLEEF_HEADER_LIST_${SLEEF_ARCH}}
+    ${SLEEF_HEADER_LIST_PUREC}
+  )
+endif()
+
+# ---------------------------------------------------------------------
 # MKRename arguments per type
+# ---------------------------------------------------------------------
 command_arguments(RENAME_PARAMS_SSE2            cinz_ 2 4 sse2)
 command_arguments(RENAME_PARAMS_SSE4            cinz_ 2 4 sse4)
 command_arguments(RENAME_PARAMS_AVX             cinz_ 4 8 avx)
@@ -263,6 +316,7 @@ if(NOT CLANG_EXE_PATH)
     find_program(CLANG_EXE_PATH NAMES clang "clang-5.0" "clang-4.0" "clang-3.9")
   endif()
 endif()
+message(STATUS "CLANG_EXE_PATH ${CLANG_EXE_PATH}")
 
 # Allow to define the Gcc/Clang here
 # As we might compile the lib with MSVC, but generates bitcode with CLANG
@@ -276,10 +330,10 @@ set(CLANG_FLAGS_ENABLE_AVX2128 "-mavx2;-mfma")
 set(CLANG_FLAGS_ENABLE_AVX512F "-mavx512f")
 set(CLANG_FLAGS_ENABLE_AVX512FNOFMA "-mavx512f")
 set(CLANG_FLAGS_ENABLE_NEON32 "--target=arm-linux-gnueabihf;-mcpu=cortex-a8")
-set(CLANG_FLAGS_ENABLE_NEON32VFPV4 "-march=armv7-a;-mfpu=neon-vfpv4")
+set(CLANG_FLAGS_ENABLE_NEON32VFPV4 "--target=arm-linux-gnueabihf;-march=armv7-a;-mfpu=neon-vfpv4")
 # Arm AArch64 vector extensions.
-set(CLANG_FLAGS_ENABLE_ADVSIMD "-march=armv8-a+simd")
-set(CLANG_FLAGS_ENABLE_ADVSIMDNOFMA "-march=armv8-a+simd")
+set(CLANG_FLAGS_ENABLE_ADVSIMD "-march=armv8-a;--target=aarch64-linux-gnueabi")
+set(CLANG_FLAGS_ENABLE_ADVSIMDNOFMA "-march=armv8-a;--target=aarch64-linux-gnueabi")
 set(CLANG_FLAGS_ENABLE_SVE "-march=armv8-a+sve")
 set(CLANG_FLAGS_ENABLE_SVENOFMA "-march=armv8-a+sve")
 # PPC64
